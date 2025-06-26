@@ -34,7 +34,7 @@ int main() {
     int ordenado = 0; // inicializa como não ordenado
 
     int qtdAlunos;
-    printf("Digite a quantidade de alunos da UFOP:");
+    printf("Digite a quantidade de alunos do ICEA:");
     scanf("%d", &qtdAlunos);
 
     if (qtdAlunos <= 0) {
