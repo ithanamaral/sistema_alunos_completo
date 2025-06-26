@@ -1,0 +1,49 @@
+# Arquivos de compilação
+*.o
+*.out
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Arquivos temporários
+*.tmp
+*~
+.*.swp
+.*.swo
+
+# Arquivos de build
+/build/
+/bin/
+/Debug/
+/Release/
+/cmake-build-*/
+
+# Arquivos específicos do CLion
+.idea/
+.vs/
+*.iml
+*.iws
+*.ipr
+*.iml .idea
+
+# Arquivos de log
+*.log
+log_aluno.txt
+
+# Arquivos de dados binários
+*.dat
+
+# Arquivos de dependências
+/deps/
+/lib/
+
+# Cache do CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Outros arquivos de sistema
+.DS_Store
+Thumbs.db
