@@ -16,7 +16,8 @@ void menu() {
     printf("2. Buscar aluno por nome\n");
     printf("3. Buscar aluno por nome do curso\n");
     printf("4. Buscar matricula (busca binaria)\n");
-    printf("5. Sair\n");
+    printf("5. Exibir a lista de todos os alunos\n");
+    printf("6. Sair\n");
     printf("----------------------------------\n");
     printf("Escolha uma opcao: \n ");
 }
@@ -158,13 +159,23 @@ int main() {
                     printf("Aluno nao encontrado.\n");
                 }
 
-            } else if (opcao != 5) {
+            } else if (opcao == 5) {
+                rewind(arq);
+                TAluno *a;
+                printf("Aqui esta a lista de todos os alunos da UFOP:\n");
+
+                while ((a = le_aluno(arq)) != NULL) {
+                    imprime_aluno(a, arquivo_cursos);
+                    free(a);
+                }
+
+            }else if (opcao != 6) {
                 printf("Opcao invalida!\n");
             }
 
             rewind(arq);
 
-        } while (opcao != 5);
+        } while (opcao != 6);
 
         fclose(arq);
         fclose(log);
