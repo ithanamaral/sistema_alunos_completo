@@ -5,15 +5,44 @@
 #include "curso.h"
 
 void criarBaseAlunos(FILE *arquivo, int qtd) {
+    srand(time(NULL));
+
+    // Gera e grava alunos com matrícula sequencial com for
     for (int i = 0; i < qtd; i++) {
         TAluno aluno;
-        aluno.matricula = 100 + i;
+        aluno.matricula = 100 + i; // sequencial (Evita repeticao)
         sprintf(aluno.nome, "Aluno %d", i + 1);
         aluno.curso_codigo = 1 + rand() % 5;
+
         fwrite(&aluno, sizeof(TAluno), 1, arquivo);
     }
-    rewind(arquivo);
+
+    // Embaralha os registros diretamente no arquivo para evitar usar a memoria RAM
+    for (int i = qtd - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+
+        TAluno aluno_i, aluno_j;
+
+        // lê aluno i
+        fseek(arquivo, i * sizeof(TAluno), SEEK_SET);
+        fread(&aluno_i, sizeof(TAluno), 1, arquivo);
+
+        // lê aluno j
+        fseek(arquivo, j * sizeof(TAluno), SEEK_SET);
+        fread(&aluno_j, sizeof(TAluno), 1, arquivo);
+
+        // grava aluno_j na posição i
+        fseek(arquivo, i * sizeof(TAluno), SEEK_SET);
+        fwrite(&aluno_j, sizeof(TAluno), 1, arquivo);
+
+        // grava aluno_i na posição j
+        fseek(arquivo, j * sizeof(TAluno), SEEK_SET);
+        fwrite(&aluno_i, sizeof(TAluno), 1, arquivo);
+    }
+
+    rewind(arquivo); // volta pro início
 }
+
 
 TAluno *le_aluno(FILE *arquivo) {
     TAluno *aluno = (TAluno *) malloc(sizeof(TAluno));
