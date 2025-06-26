@@ -8,6 +8,9 @@ if(MSVC)
 else()
     add_compile_options(-Wno-format -Wno-deprecated-declarations)
 endif()
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
 
 
 add_executable(sistema_alunos_completo
