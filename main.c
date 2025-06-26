@@ -14,7 +14,7 @@ void menu() {
     printf("\n----------- MENU UFOP ------------\n");
     printf("1. Buscar matricula (busca sequencial)\n");
     printf("2. Buscar aluno por nome\n");
-    printf("3. Buscar aluno por curso\n");
+    printf("3. Buscar aluno por nome do curso\n");
     printf("4. Buscar matricula (busca binaria)\n");
     printf("5. Sair\n");
     printf("Escolha uma opcao: ");
@@ -47,7 +47,7 @@ int main() {
             scanf("%d", &mat);
             TAluno *a = buscaSequencialAluno(mat, arq, log);
             if (a) {
-                imprime_aluno(a);
+                imprime_aluno(a, arquivo_cursos);
                 free(a);
             } else {
                 printf("Aluno nao encontrado na base de dados!\n");
@@ -64,7 +64,7 @@ int main() {
 
             while ((a = le_aluno(arq)) != NULL) {
                 if (strstr(a->nome, nomeBusca)) {
-                    imprime_aluno(a);
+                    imprime_aluno(a, arquivo_cursos);
                     encontrou = 1;
                 }
                 free(a);
@@ -72,19 +72,46 @@ int main() {
             if (!encontrou) printf("Não ha nenhum aluno com esse nome.\n");
 
         } else if (opcao == 3) {
-            int codigoCurso;
-            printf("Digite o codigo do curso: ");
-            scanf("%d", &codigoCurso);
+            char nomeCurso[30];
+            printf("Digite o nome do curso: ");
+            fgets(nomeCurso, sizeof(nomeCurso), stdin);
+            nomeCurso[strcspn(nomeCurso, "\n")] = 0; // remove \n
+            
+            // Primeiro, vamos encontrar o código do curso pelo nome
+            rewind(arquivo_cursos);
+            TCurso *curso;
+            int codigosCurso[5] = {0}; // Para armazenar múltiplos códigos que correspondam
+            int numCodigos = 0;
+            
+            while ((curso = le_curso(arquivo_cursos)) != NULL) {
+                if (strstr(curso->nome, nomeCurso) != NULL) {
+                    codigosCurso[numCodigos++] = curso->codigo;
+                    printf("Curso encontrado: %s (código: %d)\n", curso->nome, curso->codigo);
+                }
+                free(curso);
+            }
+            
+            if (numCodigos == 0) {
+                printf("Nenhum curso encontrado com esse nome.\n");
+                continue;
+            }
+            
+            // Agora busca os alunos com os códigos dos cursos encontrados
             rewind(arq);
             TAluno *a;
             int encontrou = 0;
+            
             while ((a = le_aluno(arq)) != NULL) {
-                if (a->curso_codigo == codigoCurso) {
-                    imprime_aluno(a);
-                    encontrou = 1;
+                for (int i = 0; i < numCodigos; i++) {
+                    if (a->curso_codigo == codigosCurso[i]) {
+                        imprime_aluno(a, arquivo_cursos);
+                        encontrou = 1;
+                        break; // Já encontrou correspondência, não precisa verificar outros códigos
+                    }
                 }
                 free(a);
             }
+            
             if (!encontrou) printf("Nenhum aluno encontrado nesse curso.\n");
 
         } else if (opcao == 4) {
@@ -94,7 +121,7 @@ int main() {
             int total = tamanho_arquivo_aluno(arq);
             TAluno *a = busca_binaria_aluno(mat, arq, 0, total - 1, log);
             if (a) {
-                imprime_aluno(a);
+                imprime_aluno(a, arquivo_cursos);
                 free(a);
             } else {
                 printf("Aluno nao encontrado.\n");

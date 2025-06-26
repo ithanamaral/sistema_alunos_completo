@@ -11,7 +11,7 @@ typedef struct {
 
 void criarBaseAlunos(FILE *arquivo, int qtd);
 TAluno *le_aluno(FILE *arquivo);
-void imprime_aluno(TAluno *a);
+void imprime_aluno(TAluno *a, FILE *arquivo_cursos);
 int tamanho_arquivo_aluno(FILE *arquivo);
 
 #endif

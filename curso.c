@@ -4,11 +4,11 @@
 #include "curso.h"
 
 void criarBaseCursos(FILE *arquivo, int qtd) {
-    char nomes[5][30] = {"Computacao", "Direito", "Engenharia", "Medicina", "Arquitetura"};
+    char nomes[5][30] = {"Eng. Computacao", "Eng. Eletrica", "Sistemas", "Eng. Producao"};
     for (int i = 0; i < qtd; i++) {
         TCurso curso;
         curso.codigo = i + 1;
-        strncpy(curso.nome, nomes[i % 5], sizeof(curso.nome));
+        strncpy(curso.nome, nomes[i % 4], sizeof(curso.nome));
         fwrite(&curso, sizeof(TCurso), 1, arquivo);
     }
     rewind(arquivo);
