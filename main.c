@@ -69,11 +69,11 @@ int main() {
                 }
                 free(a);
             }
-            if (!encontrou) printf("Não há nenhum aluno com esse nome.\n");
+            if (!encontrou) printf("Não ha nenhum aluno com esse nome.\n");
 
         } else if (opcao == 3) {
             int codigoCurso;
-            printf("Digite o código do curso: ");
+            printf("Digite o codigo do curso: ");
             scanf("%d", &codigoCurso);
             rewind(arq);
             TAluno *a;
@@ -89,7 +89,7 @@ int main() {
 
         } else if (opcao == 4) {
             int mat;
-            printf("Digite a matrícula a buscar (binária): ");
+            printf("Digite a matricula a buscar (binária): ");
             scanf("%d", &mat);
             int total = tamanho_arquivo_aluno(arq);
             TAluno *a = busca_binaria_aluno(mat, arq, 0, total - 1, log);
@@ -97,7 +97,7 @@ int main() {
                 imprime_aluno(a);
                 free(a);
             } else {
-                printf("Aluno não encontrado.\n");
+                printf("Aluno nao encontrado.\n");
             }
 
         } else if (opcao != 5) {
