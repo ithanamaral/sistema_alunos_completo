@@ -6,10 +6,10 @@
 void criarBaseCursos(FILE *arquivo, int qtd) {
     //array com os cursos do ICEA
     char nomes[4][30] = {
-        "Engenharia de Computacao",
-        "Engenharia Eletrica",
-        "Sistemas",
-        "Engenharia de Producao",
+        "engenharia de computacao",
+        "engenharia eletrica",
+        "sistemas",
+        "engenharia de producao",
     };
 
     //grava os cursos diretamente no arquivo
@@ -37,10 +37,3 @@ TCurso *le_curso(FILE *arquivo) {
     return curso;
 }
 
-//função auxiliar para obter o tamanho do arquivo de cursos
-int tamanho_arquivo_curso(FILE *arquivo) {
-    fseek(arquivo, 0, SEEK_END);
-    long tamanho = ftell(arquivo);
-    rewind(arquivo);
-    return (int)(tamanho / sizeof(TCurso));
-}
