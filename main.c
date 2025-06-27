@@ -28,6 +28,7 @@ int main() {
 
     FILE *arq, *log, *arquivo_cursos;
 
+    //O fopen é usado pra abrir ou criar os arquivos log e binários e exibe mensagens de erro se o comando falhar
     if ((log = fopen("log_aluno.txt", "a+")) == NULL) { perror("log"); exit(1); }
     if ((arq = fopen("aluno.dat", "w+b")) == NULL) { perror("aluno.dat"); exit(1); }
     if ((arquivo_cursos = fopen("curso.dat", "w+b")) == NULL) { perror("curso.dat"); exit(1); }
@@ -43,9 +44,9 @@ int main() {
         exit(1);
     }
 
-    //Inicializando os dados...
-    criarBaseCursos(arquivo_cursos, 5); // mantém os 5 cursos fixos
-    criarBaseAlunos(arq, qtdAlunos); //gera a quantidade de alunos fornecida pelo usuário
+    //Inicializa os dados
+    criarBaseCursos(arquivo_cursos, 5); // mantém os 5 cursos fixos disponíveis no ICEA
+    criarBaseAlunos(arq, qtdAlunos); //alunos definidos pelo usuário
 
     char resposta;
     printf("Deseja ordenar os alunos por matricula agora? \n(Por favor, responda com S ou N): ");
@@ -59,19 +60,18 @@ int main() {
     } else {
         printf("Os alunos nao foram ordenados. A busca binaria pode nao funcionar corretamente!\n");
     }
-    //ordenaMergeAlunos(arq);
 
         int opcao;
         do {
             menu();
             scanf("%d", &opcao);
-            getchar(); // consumir \n
+            getchar(); // consome o \n
 
             if (opcao == 1) {
                 int mat;
-                printf("Digite a matricula que voce deseja buscar (sequencial): ");
+                printf("Digite a matricula que voce deseja buscar (busca sequencial): ");
                 scanf("%d", &mat);
-                TAluno *a = buscaSequencialAluno(mat, arq, log);
+                TAluno *a = buscaSequencialAluno(mat, arq, log); //procura a matricula no arquivo
                 if (a) {
                     imprime_aluno(a, arquivo_cursos);
                     free(a);
@@ -84,12 +84,12 @@ int main() {
                 printf("Digite o nome do aluno: ");
                 fgets(nomeBusca, sizeof(nomeBusca), stdin);
                 nomeBusca[strcspn(nomeBusca, "\n")] = 0; // remove \n
-                rewind(arq);
+                rewind(arq); //reposiciona o ponteiro do arquivo pro inicio
                 TAluno *a;
                 int encontrou = 0;
 
                 while ((a = le_aluno(arq)) != NULL) {
-                    if (strstr(a->nome, nomeBusca)) {
+                    if (strstr(a->nome, nomeBusca)) { //procura a substring na string maior de nomes
                         imprime_aluno(a, arquivo_cursos);
                         encontrou = 1;
                     }
@@ -104,13 +104,12 @@ int main() {
                 nomeCurso[strcspn(nomeCurso, "\n")] = 0; // remove \n
 
                 for(int i = 0; nomeCurso[i]; i++) {
-                    nomeCurso[i] = tolower(nomeCurso[i]);
+                    nomeCurso[i] = tolower(nomeCurso[i]); //converte os caracteres para letras minúsculas
                 }
 
-                // Primeiro, vamos encontrar o código do curso pelo nome
                 rewind(arquivo_cursos);
                 TCurso *curso;
-                int codigosCurso[5] = {0}; // Para armazenar múltiplos códigos que correspondam
+                int codigosCurso[5] = {0}; // para armazenar múltiplos códigos que correspondam
                 int numCodigos = 0;
 
                 while ((curso = le_curso(arquivo_cursos)) != NULL) {
@@ -126,7 +125,7 @@ int main() {
                     continue;
                 }
 
-                // Agora busca os alunos
+                //Agora buscamos os alunos
                 rewind(arq);
                 TAluno *a;
                 int encontrou = 0;
@@ -136,7 +135,7 @@ int main() {
                         if (a->curso_codigo == codigosCurso[i]) {
                             imprime_aluno(a, arquivo_cursos);
                             encontrou = 1;
-                            break; // Já encontrou correspondência, não precisa verificar outros códigos
+                            break; //pois já encontrou correspondência
                         }
                     }
                     free(a);
@@ -153,7 +152,7 @@ int main() {
 
 
                 int mat;
-                printf("Digite a matricula a buscar (binaria): ");
+                printf("Digite a matricula a buscar (busca binaria): ");
                 scanf("%d", &mat);
                 int total = tamanho_arquivo_aluno(arq);
                 TAluno *a = busca_binaria_aluno(mat, arq, 0, total - 1, log);
@@ -178,7 +177,7 @@ int main() {
                 printf("Opcao invalida!\n");
             }
 
-            rewind(arq);
+            rewind(arq); // volta pro inicio do arquivo
 
         } while (opcao != 6);
 
