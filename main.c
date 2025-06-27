@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
@@ -101,6 +102,10 @@ int main() {
                 printf("Digite o nome do curso: ");
                 fgets(nomeCurso, sizeof(nomeCurso), stdin);
                 nomeCurso[strcspn(nomeCurso, "\n")] = 0; // remove \n
+
+                for(int i = 0; nomeCurso[i]; i++) {
+                    nomeCurso[i] = tolower(nomeCurso[i]);
+                }
 
                 // Primeiro, vamos encontrar o código do curso pelo nome
                 rewind(arquivo_cursos);

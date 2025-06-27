@@ -4,7 +4,7 @@
 #include "curso.h"
 
 void criarBaseCursos(FILE *arquivo, int qtd) {
-    char nomes[5][30] = {"Engenharia de Computacao", "Engenharia Eletrica", "Sistemas", "Engenharia de Producao"};
+    char nomes[5][30] = {"engenharia de computacao", "engenharia eletrica", "sistemas", "engenharia de producao"};
     for (int i = 0; i < qtd; i++) {
         TCurso curso;
         curso.codigo = i + 1;
