@@ -7,12 +7,12 @@
 void criarBaseAlunos(FILE *arquivo, int qtd) {
     srand(time(NULL));
 
-    // Gera e grava alunos com matrícula sequencial com for
+    //Gera e grava alunos com matrícula sequencial com for
     for (int i = 0; i < qtd; i++) {
         TAluno aluno;
         aluno.matricula = 100 + i; // sequencial (Evita repeticao)
         sprintf(aluno.nome, "Aluno %d", i + 1);
-        aluno.curso_codigo = 1 + rand() % 5;
+        aluno.curso_codigo = 1 + rand() % 5; //atribui curso aleatorio de 1 a 5
 
         fwrite(&aluno, sizeof(TAluno), 1, arquivo);
     }
@@ -23,19 +23,19 @@ void criarBaseAlunos(FILE *arquivo, int qtd) {
 
         TAluno aluno_i, aluno_j;
 
-        // lê aluno i
+        //lê aluno i
         fseek(arquivo, i * sizeof(TAluno), SEEK_SET);
         fread(&aluno_i, sizeof(TAluno), 1, arquivo);
 
-        // lê aluno j
+        //lê aluno j
         fseek(arquivo, j * sizeof(TAluno), SEEK_SET);
         fread(&aluno_j, sizeof(TAluno), 1, arquivo);
 
-        // grava aluno_j na posição i
+        //grava aluno_j na posição i
         fseek(arquivo, i * sizeof(TAluno), SEEK_SET);
         fwrite(&aluno_j, sizeof(TAluno), 1, arquivo);
 
-        // grava aluno_i na posição j
+        //grava aluno_i na posição j
         fseek(arquivo, j * sizeof(TAluno), SEEK_SET);
         fwrite(&aluno_i, sizeof(TAluno), 1, arquivo);
     }
@@ -81,7 +81,7 @@ void imprime_aluno(TAluno *a, FILE *arquivo_cursos) {
     fseek(arquivo_cursos, posicao_atual, SEEK_SET);
 }
 
-int tamanho_arquivo_aluno(FILE *arquivo) {
+int tamanho_arquivo_aluno(FILE *arquivo) { //Calcula quantos alunos estao gravados no arquivo
     fseek(arquivo, 0, SEEK_END);
     long tamanho = ftell(arquivo);
     rewind(arquivo);

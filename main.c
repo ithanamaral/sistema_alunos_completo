@@ -45,7 +45,7 @@ int main() {
     }
 
     //Inicializa os dados
-    criarBaseCursos(arquivo_cursos, 5); // mantém os 5 cursos fixos disponíveis no ICEA
+    criarBaseCursos(arquivo_cursos, 5); // mantém os cursos fixos disponíveis no ICEA
     criarBaseAlunos(arq, qtdAlunos); //alunos definidos pelo usuário
 
     char resposta;
@@ -78,6 +78,7 @@ int main() {
                 } else {
                     printf("Aluno nao encontrado na base de dados!\n");
                 }
+                fflush(log);
 
             } else if (opcao == 2) {
                 char nomeBusca[50];
@@ -162,6 +163,7 @@ int main() {
                 } else {
                     printf("Aluno nao encontrado.\n");
                 }
+                fflush(log);
 
             } else if (opcao == 5) {
                 rewind(arq);
