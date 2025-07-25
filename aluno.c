@@ -12,7 +12,7 @@ void criarBaseAlunos(FILE *arquivo, int qtd) {
         TAluno aluno;
         aluno.matricula = 100 + i; // sequencial (Evita repeticao)
         sprintf(aluno.nome, "Aluno %d", i + 1);
-        aluno.curso_codigo = 1 + rand() % 5; //atribui curso aleatorio de 1 a 5
+        aluno.curso_codigo = 1 + rand() % 5; //atribui curso aleatorio
 
         fwrite(&aluno, sizeof(TAluno), 1, arquivo);
     }
