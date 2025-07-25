@@ -8,6 +8,7 @@
 #include "ordenacaoAluno.h"
 #include "buscaSequencialAluno.h"
 #include "buscaBinariaAluno.h"
+#include "ordenacaoExternaAluno.h"
 
 //Feito por Rafael Araújo e Íthan Amaral
 
@@ -18,7 +19,8 @@ void menu() {
     printf("3. Buscar aluno por nome do curso\n");
     printf("4. Buscar matricula (busca binaria)\n");
     printf("5. Exibir a lista de todos os alunos\n");
-    printf("6. Sair\n");
+    printf("6. Ordenar alunos por matricula (modo externo)\n");
+    printf("7. Sair\n");
     printf("----------------------------------\n");
     printf("Escolha uma opcao: \n ");
 }
@@ -175,13 +177,22 @@ int main() {
                     free(a);
                 }
 
-            }else if (opcao != 6) {
+            }else if (opcao == 6) {
+                int m;
+                printf("Digite o tamanho maximo da memoria em registros para a Selecao Natural: ");
+                scanf("%d", &m);
+                int numParticoes = selecaoNaturalAluno(arq, m);
+                intercalacaoOtimaAluno(numParticoes, 3); // ou outro valor de F
+                printf("Arquivo ordenado externamente com sucesso!\n");
+                ordenado = 1;
+
+            }else if (opcao != 7) {
                 printf("Opcao invalida!\n");
             }
 
             rewind(arq); // volta pro inicio do arquivo
 
-        } while (opcao != 6);
+        } while (opcao != 7);
 
         fclose(arq);
         fclose(log);
