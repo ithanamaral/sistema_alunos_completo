@@ -70,11 +70,15 @@ int selecaoNaturalAluno(FILE *entrada, int M) {
 
     sprintf(nome, DIR_PARTICOES "/particao_%d.dat", particao);
     FILE *saida = fopen(nome, "wb");
+    printf("\n------ Selecao Natural ------\n");
+    printf("Gerando particao %d:\n", particao);
+
 
     while (!fim || tamMem > 0) {
         if (tamMem > 0) {
             TAluno menor = memoria[0];
             fwrite(&menor, sizeof(TAluno), 1, saida);
+            printf("%d ", menor.matricula);
 
             TAluno novo;
             if (!fim && fread(&novo, sizeof(TAluno), 1, entrada) == 1) {
@@ -96,9 +100,11 @@ int selecaoNaturalAluno(FILE *entrada, int M) {
 
         if (tamMem == 0 && tamRes > 0) {
             fclose(saida);
+            printf("\n");
             particao++;
             sprintf(nome, DIR_PARTICOES "/particao_%d.dat", particao);
             saida = fopen(nome, "wb");
+            printf("Gerando particao %d:\n", particao);
             for (int i = 0; i < tamRes; i++) memoria[i] = reserva[i];
             tamMem = tamRes;
             tamRes = 0;
@@ -108,6 +114,7 @@ int selecaoNaturalAluno(FILE *entrada, int M) {
 
     fclose(saida);
     fclose(entrada);
+    printf("\n");
 
     clock_t fimExec = clock();
     double tempo = (double)(fimExec - inicio) / CLOCKS_PER_SEC;
@@ -143,10 +150,12 @@ void heapifyHeapAluno(HeapAluno *arr, int n, int i, int *comparacoes) {
         heapifyHeapAluno(arr, n, menor, comparacoes);
     }
 }
-
+//Intercalacao Otima
 void intercalacaoOtimaAluno(int numParticoes, int F) {
     clock_t inicio = clock();
     int comparacoes = 0;
+
+    printf("\n------ Intercalacao Otima ------\n");
 
     char arquivos[numParticoes][100];
     for (int i = 0; i < numParticoes; i++) {
@@ -159,6 +168,7 @@ void intercalacaoOtimaAluno(int numParticoes, int F) {
 
     while (atual > 1) {
         int novoQtd = 0;
+        printf("Rodada %d:\n", rodada);
 
         for (int i = 0; i < atual; i += F) {
             int fim = (i + F < atual) ? (i + F) : atual;
@@ -169,25 +179,29 @@ void intercalacaoOtimaAluno(int numParticoes, int F) {
             HeapAluno heap[F];
             int tam = 0;
 
+            printf("  Mesclando ");
             for (int j = i; j < fim; j++) {
+                printf("'%s' ", arquivos[j]);
                 entradas[j - i] = fopen(arquivos[j], "rb");
                 if (fread(&heap[tam].aluno, sizeof(TAluno), 1, entradas[j - i]) == 1) {
                     heap[tam].origem = j - i;
                     tam++;
                 }
-            }
+            }printf("para '%s':\n    ", nomeSaida);
 
             for (int j = tam / 2 - 1; j >= 0; j--)
                 heapifyHeapAluno(heap, tam, j, &comparacoes);
 
             while (tam > 0) {
                 fwrite(&heap[0].aluno, sizeof(TAluno), 1, saida);
+                printf("%d ", heap[0].aluno.matricula);
                 if (fread(&heap[0].aluno, sizeof(TAluno), 1, entradas[heap[0].origem]) != 1) {
                     heap[0] = heap[tam - 1];
                     tam--;
                 }
                 heapifyHeapAluno(heap, tam, 0, &comparacoes);
             }
+            printf("\n");
 
             for (int j = 0; j < fim - i; j++) fclose(entradas[j]);
             fclose(saida);
@@ -198,11 +212,16 @@ void intercalacaoOtimaAluno(int numParticoes, int F) {
         atual = novoQtd;
     }
 
-    // copia final para aluno.dat
+    //copia final para aluno.dat
     FILE *final = fopen("aluno.dat", "wb");
     FILE *intercalado = fopen(arquivos[0], "rb");
     TAluno a;
-    while (fread(&a, sizeof(TAluno), 1, intercalado) == 1) fwrite(&a, sizeof(TAluno), 1, final);
+    printf("\nCopiando resultado final para aluno.dat:\n");
+    while (fread(&a, sizeof(TAluno), 1, intercalado) == 1) {
+        fwrite(&a, sizeof(TAluno), 1, final);
+        printf("%d ", a.matricula);
+    }
+    printf("\n");
     fclose(intercalado);
     fclose(final);
 
