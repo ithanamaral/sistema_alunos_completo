@@ -20,7 +20,8 @@ void menu() {
     printf("4. Buscar matricula (busca binaria)\n");
     printf("5. Exibir a lista de todos os alunos\n");
     printf("6. Ordenar alunos por matricula (modo externo)\n");
-    printf("7. Sair\n");
+    printf("7. MergeSort\n");
+    printf("8. Sair\n");
     printf("----------------------------------\n");
     printf("Escolha uma opcao: \n ");
 }
@@ -186,13 +187,19 @@ int main() {
                 printf("Arquivo ordenado externamente com sucesso!\n");
                 ordenado = 1;
 
-            }else if (opcao != 7) {
+            }else if (opcao == 7) {
+                ordenaMergeAlunos(arq);
+                ordenado = 1;
+
+                printf("Mergesort realizado com sucesso.\n");
+            }
+            else if (opcao != 8) {
                 printf("Opcao invalida!\n");
             }
 
             rewind(arq); // volta pro inicio do arquivo
 
-        } while (opcao != 7);
+        } while (opcao != 8);
 
         fclose(arq);
         fclose(log);
