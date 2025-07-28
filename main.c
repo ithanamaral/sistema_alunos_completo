@@ -9,6 +9,8 @@
 #include "buscaSequencialAluno.h"
 #include "buscaBinariaAluno.h"
 #include "ordenacaoExternaAluno.h"
+#include <time.h>
+
 
 //Feito por Rafael Araújo e Íthan Amaral
 
@@ -20,7 +22,7 @@ void menu() {
     printf("4. Buscar matricula (busca binaria)\n");
     printf("5. Exibir a lista de todos os alunos\n");
     printf("6. Ordenar alunos por matricula (modo externo)\n");
-    printf("7. MergeSort\n");
+    printf("7. Ordenar usando o MergeSort\n");
     printf("8. Sair\n");
     printf("----------------------------------\n");
     printf("Escolha uma opcao: \n ");
@@ -182,8 +184,20 @@ int main() {
                 int m;
                 printf("Digite o tamanho maximo da memoria em registros para a Selecao Natural: ");
                 scanf("%d", &m);
+                clock_t inicioTotal = clock(); // inicia cronômetro total
+
                 int numParticoes = selecaoNaturalAluno(arq, m);
-                intercalacaoOtimaAluno(numParticoes, 3); // ou outro valor de F
+                intercalacaoOtimaAluno(numParticoes, 3);
+
+                clock_t fimTotal = clock();
+                double tempoTotal = (double)(fimTotal - inicioTotal) / CLOCKS_PER_SEC;
+
+                FILE *log = fopen("ArquivosLog/dadosOrdenacaoExterna.txt", "a");
+                if (log) {
+                    fprintf(log, "Tempo TOTAL de Ordenacao Externa: %.2fs\n\n", tempoTotal);
+                    fclose(log);
+                }
+
                 printf("Arquivo ordenado externamente com sucesso!\n");
                 ordenado = 1;
 
