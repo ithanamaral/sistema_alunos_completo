@@ -26,4 +26,6 @@ add_executable(sistema_alunos_completo
         ordenacaoAluno.c
         ordenacaoAluno.h
         ordenacaoExternaAluno.c
-        ordenacaoExternaAluno.h)
+        ordenacaoExternaAluno.h
+        tabela_hash_aluno.h
+        tabela_hash_aluno.c)

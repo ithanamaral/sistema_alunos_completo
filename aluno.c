@@ -3,6 +3,7 @@
 #include <string.h>
 #include "aluno.h"
 #include "curso.h"
+#include <time.h>
 
 void criarBaseAlunos(FILE *arquivo, int qtd) {
     srand(time(NULL));
@@ -10,9 +11,10 @@ void criarBaseAlunos(FILE *arquivo, int qtd) {
     //Gera e grava alunos com matrícula sequencial com for
     for (int i = 0; i < qtd; i++) {
         TAluno aluno;
-        aluno.matricula = 100 + i; // sequencial (Evita repeticao)
+        aluno.matricula = 100 + i;
         sprintf(aluno.nome, "Aluno %d", i + 1);
-        aluno.curso_codigo = 1 + rand() % 5; //atribui curso aleatorio
+        aluno.curso_codigo = 1 + rand() % 5;
+        aluno.ocupado = true;
 
         fwrite(&aluno, sizeof(TAluno), 1, arquivo);
     }

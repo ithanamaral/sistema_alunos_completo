@@ -2,7 +2,7 @@
 #define ORDENACAO_ALUNO_H
 
 #include <stdio.h>
-#include "aluno.h"45
+#include "aluno.h"
 
 void ordenaMergeAlunos(FILE *arquivo);
 

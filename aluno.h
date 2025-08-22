@@ -2,11 +2,13 @@
 #define ALUNO_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef struct {
     int matricula;
     char nome[50];
     int curso_codigo;
+    bool ocupado;
 } TAluno;
 
 void criarBaseAlunos(FILE *arquivo, int qtd);
