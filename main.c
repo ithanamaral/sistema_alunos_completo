@@ -65,6 +65,7 @@ int main() {
 
     criarBaseCursos(arquivo_cursos, 5);
     criarBaseAlunos(arq, qtdAlunos);
+    //Inicializa a tabela com os alunos da alunos.dat
     inicializa_tabela_hash_alunos(tabela_hash_dat, lista_encadeada_dat, arq);
     printf("\nTabela Hash inicializada com os dados dos alunos.\n");
 

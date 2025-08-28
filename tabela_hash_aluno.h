@@ -16,7 +16,7 @@ typedef struct {
     bool ocupado;
 } TNoHashAluno;
 
-// Protótipos das Funções
+
 int funcao_hash_aluno(int codigo);
 void cria_tabela_hash_vazia(FILE *tabelaHash);
 void inicializa_tabela_hash_alunos(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_alunos);

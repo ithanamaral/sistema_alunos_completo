@@ -13,7 +13,7 @@ int funcao_hash_aluno(int codigo) {
 
 // Inicializa o arquivo da tabela hash com -1 em todas as posições
 void cria_tabela_hash_vazia(FILE *tabelaHash) {
-    int ponteiroVazio = -1;
+    int ponteiroVazio = -1; //-1 atua como um ponteiro nulo, indicando que aquele "compartimento" (ou bucket) da tabela está vazio.
     rewind(tabelaHash);
     for (int i = 0; i < TAMANHO_HASH_ALUNO; i++) {
         fwrite(&ponteiroVazio, sizeof(int), 1, tabelaHash);
@@ -23,7 +23,7 @@ void cria_tabela_hash_vazia(FILE *tabelaHash) {
 
 // Insere um aluno na tabela hash baseada em arquivo
 void inserir_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, TAluno *aluno) {
-    int hash_local = funcao_hash_aluno(aluno->matricula);
+    int hash_local = funcao_hash_aluno(aluno->matricula); //posição do arquivo
     fseek(tabelaHash, hash_local * sizeof(int), SEEK_SET);
 
     int ponteiro_compartimento;
@@ -82,8 +82,6 @@ void inicializa_tabela_hash_alunos(FILE *tabelaHash, FILE *listaEncadeada, FILE 
     }
 }
 
-
-// Busca um aluno na tabela hash
 TAluno* buscar_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, int matricula) {
     int hash_local = funcao_hash_aluno(matricula);
     fseek(tabelaHash, hash_local * sizeof(int), SEEK_SET);
@@ -111,7 +109,6 @@ TAluno* buscar_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, int matricula)
     return NULL; // Não encontrou na lista
 }
 
-// Realiza a remoção lógica de um aluno
 bool remover_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_alunos, int matricula) {
     int hash_local = funcao_hash_aluno(matricula);
     fseek(tabelaHash, hash_local * sizeof(int), SEEK_SET);
@@ -153,10 +150,10 @@ bool remover_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_al
         }
         pos_atual = no_atual.proximo;
     }
-    return false; // Não encontrou
+    return false;
 }
 
-// Imprime a estrutura da tabela hash
+
 void imprimir_tabela_hash(FILE *tabelaHash, FILE *listaEncadeada) {
     rewind(tabelaHash);
     printf("\n--- ESTRUTURA DA TABELA HASH (ALUNOS) ---\n");
