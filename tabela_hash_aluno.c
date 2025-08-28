@@ -21,13 +21,13 @@ void cria_tabela_hash_vazia(FILE *tabelaHash) {
     fflush(tabelaHash);
 }
 
-//insere um aluno na tabela hash em disco
+//insere um aluno na tabela hash baseada em arquivo
 void inserir_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, TAluno *aluno) {
-    // primeiro, calcula a posição onde o aluno deveria estar
+    // primeiro, calcula a posição (hash) onde o aluno deveria estar
     int hash_local = funcao_hash_aluno(aluno->matricula);
     fseek(tabelaHash, hash_local * sizeof(int), SEEK_SET);
 
-    // lê o valor que está nesse local. esse valor é o ponteiro para o primeiro nó da lista encadeada
+    // lê o valor que está nesse local. esse valor é o ponteiro para o primeiro nó da lista encadeada.
     int ponteiro_compartimento;
     fread(&ponteiro_compartimento, sizeof(int), 1, tabelaHash);
 
@@ -35,7 +35,7 @@ void inserir_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, TAluno *aluno) {
     TNoHashAluno novo_no;
     novo_no.aluno = *aluno;
     novo_no.proximo = -1; // como ele será o último da lista, o próximo é -1.
-    novo_no.ocupado = true; // marca o nó como ocupado.
+    novo_no.ocupado = true; // marca o nó atual como ocupado.
 
     // verifica se o compartimento (bucket) está vazio.
     if (ponteiro_compartimento == -1) {
@@ -43,7 +43,9 @@ void inserir_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, TAluno *aluno) {
         // vai para o final do arquivo da lista encadeada para adicionar o novo nó.
         fseek(listaEncadeada, 0, SEEK_END);
         // calcula a posição (índice) do novo nó.
-        int pos_novo_no = ftell(listaEncadeada) / sizeof(TNoHashAluno);
+        //ftell  retorna a posição atual do "cursor", até o final, em bytes informando o tamanho do arquivo
+        //sizeoff calcula o tamanho do registro
+        int pos_novo_no = ftell(listaEncadeada) / sizeof(TNoHashAluno); //número total de registros já existentes
         fwrite(&novo_no, sizeof(TNoHashAluno), 1, listaEncadeada);
 
         // agora, atualiza a tabela hash para apontar para este novo nó.
@@ -80,12 +82,13 @@ void inserir_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, TAluno *aluno) {
 }
 
 
-// carrega todos os alunos do arquivo principal para a tabela hash
+// carrega todos os alunos do arquivo principal aluno.dat para a tabela hash
 void inicializa_tabela_hash_alunos(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_alunos) {
     cria_tabela_hash_vazia(tabelaHash); // primeiro, limpa a tabela hash.
     rewind(arquivo_alunos); // volta para o início do arquivo de alunos.
     TAluno *aluno_lido;
     // lê cada aluno do arquivo principal.
+    // lê um registro de aluno, aloca memória e retorna um ponteiro (aluno_lido) para essa estrutura.
     while ((aluno_lido = le_aluno(arquivo_alunos)) != NULL) {
         // insere na tabela hash apenas se o aluno estiver marcado como 'ocupado'.
         if (aluno_lido->ocupado) {
@@ -95,10 +98,11 @@ void inicializa_tabela_hash_alunos(FILE *tabelaHash, FILE *listaEncadeada, FILE 
     }
 }
 
-// busca por um aluno usando a matrícula, aproveitando a velocidade da tabela hash.
+// busca por um aluno usando a matrícula, retornando o struct de aluno.
 TAluno* buscar_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, int matricula) {
     // calcula a posição provável do aluno na tabela.
     int hash_local = funcao_hash_aluno(matricula);
+    // Manda o ponteiro para essa posição
     fseek(tabelaHash, hash_local * sizeof(int), SEEK_SET);
 
     // lê o ponteiro para a lista de alunos naquela posição.
@@ -129,7 +133,6 @@ TAluno* buscar_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, int matricula)
     }
     return NULL; // não encontrou na lista.
 }
-
 // remove um aluno logicamente, marcando como nao ocupado
 bool remover_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_alunos, int matricula) {
     // o processo de busca inicial é o mesmo da função de buscar.
