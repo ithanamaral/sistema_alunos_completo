@@ -5,20 +5,20 @@
 #include "tabela_hash_aluno.h"
 
 // função de hashing por divisão
-// ela calcula a posição do aluno na tabela.
+// ela vai calcular a posição do aluno na tabela
 int funcao_hash_aluno(int codigo) {
     return codigo % TAMANHO_HASH_ALUNO;
 }
 
 // inicializa o arquivo da tabela hash com -1 em todas as posições
 void cria_tabela_hash_vazia(FILE *tabelaHash) {
-    int ponteiroVazio = -1; // -1 atua como um ponteiro nulo, indicando que aquele "compartimento" da tabela está vazio.
+    int ponteiroVazio = -1; // -1 atua como um ponteiro nulo, indicando que aquele "compartimento" da tabela está vazio
     rewind(tabelaHash);
     // percorre a tabela inteira, escrevendo -1 em cada posição.
     for (int i = 0; i < TAMANHO_HASH_ALUNO; i++) {
         fwrite(&ponteiroVazio, sizeof(int), 1, tabelaHash);
     }
-    fflush(tabelaHash); //força a escrita dos dados no disco para garantir que a tabela seja salva corretamente.
+    fflush(tabelaHash); //força a escrita dos dados no disco para garantir que a tabela seja salva corretamente
 }
 
 //insere um aluno na tabela hash baseada em arquivo
@@ -27,7 +27,7 @@ void inserir_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, TAluno *aluno) {
     int hash_local = funcao_hash_aluno(aluno->matricula);
     fseek(tabelaHash, hash_local * sizeof(int), SEEK_SET);
 
-    // lê o valor que está nesse local. esse valor é o ponteiro para o primeiro nó da lista encadeada.
+    // lê o valor que está nesse local. esse valor é o ponteiro para o primeiro nó da lista encadeada
     int ponteiro_compartimento;
     fread(&ponteiro_compartimento, sizeof(int), 1, tabelaHash);
 
