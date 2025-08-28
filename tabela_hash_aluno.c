@@ -1,115 +1,138 @@
-// tabela_hash_aluno.c
-
 #ifndef TABELA_HASH_ALUNO_C
 #define TABELA_HASH_ALUNO_C
 
 #include <stdlib.h>
 #include "tabela_hash_aluno.h"
 
-// Função de Hashing por Divisão
+// função de hashing por divisão
+// ela calcula a posição do aluno na tabela.
 int funcao_hash_aluno(int codigo) {
     return codigo % TAMANHO_HASH_ALUNO;
 }
 
-// Inicializa o arquivo da tabela hash com -1 em todas as posições
+// inicializa o arquivo da tabela hash com -1 em todas as posições
 void cria_tabela_hash_vazia(FILE *tabelaHash) {
-    int ponteiroVazio = -1; //-1 atua como um ponteiro nulo, indicando que aquele "compartimento" (ou bucket) da tabela está vazio.
+    int ponteiroVazio = -1; // -1 atua como um ponteiro nulo, indicando que aquele "compartimento" da tabela está vazio.
     rewind(tabelaHash);
+    // percorre a tabela inteira, escrevendo -1 em cada posição.
     for (int i = 0; i < TAMANHO_HASH_ALUNO; i++) {
         fwrite(&ponteiroVazio, sizeof(int), 1, tabelaHash);
     }
-    fflush(tabelaHash);
+    fflush(tabelaHash); //força a escrita dos dados no disco para garantir que a tabela seja salva corretamente.
 }
 
-// Insere um aluno na tabela hash baseada em arquivo
+//insere um aluno na tabela hash baseada em arquivo
 void inserir_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, TAluno *aluno) {
-    int hash_local = funcao_hash_aluno(aluno->matricula); //posição do arquivo
+    // primeiro, calcula a posição (hash) onde o aluno deveria estar
+    int hash_local = funcao_hash_aluno(aluno->matricula);
     fseek(tabelaHash, hash_local * sizeof(int), SEEK_SET);
 
+    // lê o valor que está nesse local. esse valor é o ponteiro para o primeiro nó da lista encadeada.
     int ponteiro_compartimento;
     fread(&ponteiro_compartimento, sizeof(int), 1, tabelaHash);
 
+    // prepara o novo nó que será inserido na lista, com os dados do aluno.
     TNoHashAluno novo_no;
     novo_no.aluno = *aluno;
-    novo_no.proximo = -1;
-    novo_no.ocupado = true;
+    novo_no.proximo = -1; // como ele será o último da lista, o próximo é -1.
+    novo_no.ocupado = true; // marca o nó como ocupado.
 
+    // verifica se o compartimento (bucket) está vazio.
     if (ponteiro_compartimento == -1) {
-        // Compartimento vazio, insere na lista e atualiza a tabela
+        // se estiver vazio, a inserção é mais simples.
+        // vai para o final do arquivo da lista encadeada para adicionar o novo nó.
         fseek(listaEncadeada, 0, SEEK_END);
+        // calcula a posição (índice) do novo nó.
         int pos_novo_no = ftell(listaEncadeada) / sizeof(TNoHashAluno);
         fwrite(&novo_no, sizeof(TNoHashAluno), 1, listaEncadeada);
 
+        // agora, atualiza a tabela hash para apontar para este novo nó.
         fseek(tabelaHash, hash_local * sizeof(int), SEEK_SET);
         fwrite(&pos_novo_no, sizeof(int), 1, tabelaHash);
     } else {
-        // Compartimento ocupado, adiciona no fim da lista
+        // se o compartimento já estiver ocupado, significa que houve uma colisão.
+        // precisamos adicionar o novo aluno ao final da lista encadeada existente.
         int pos_atual = ponteiro_compartimento;
         TNoHashAluno no_atual;
+        // percorre a lista até encontrar o último nó (aquele cujo 'proximo' é -1).
         while (1) {
             fseek(listaEncadeada, pos_atual * sizeof(TNoHashAluno), SEEK_SET);
             fread(&no_atual, sizeof(TNoHashAluno), 1, listaEncadeada);
             if (no_atual.proximo == -1) {
-                break; // Achou o último nó
+                break; // achou o último nó.
             }
             pos_atual = no_atual.proximo;
         }
 
+        // agora que achamos o fim da lista, adiciona o novo nó no final do arquivo.
         fseek(listaEncadeada, 0, SEEK_END);
         int pos_novo_no = ftell(listaEncadeada) / sizeof(TNoHashAluno);
         fwrite(&novo_no, sizeof(TNoHashAluno), 1, listaEncadeada);
 
-        // Atualiza o ponteiro do último nó para apontar para o novo
+        // por fim, atualiza o antigo último nó para que ele aponte para o novo nó que acabamos de inserir.
         no_atual.proximo = pos_novo_no;
         fseek(listaEncadeada, pos_atual * sizeof(TNoHashAluno), SEEK_SET);
         fwrite(&no_atual, sizeof(TNoHashAluno), 1, listaEncadeada);
     }
+    // garante que todas as alterações sejam salvas nos arquivos.
     fflush(tabelaHash);
     fflush(listaEncadeada);
 }
 
 
-// Carrega todos os alunos do arquivo principal para a tabela hash
+// carrega todos os alunos do arquivo principal para a tabela hash
 void inicializa_tabela_hash_alunos(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_alunos) {
-    cria_tabela_hash_vazia(tabelaHash);
-    rewind(arquivo_alunos);
+    cria_tabela_hash_vazia(tabelaHash); // primeiro, limpa a tabela hash.
+    rewind(arquivo_alunos); // volta para o início do arquivo de alunos.
     TAluno *aluno_lido;
+    // lê cada aluno do arquivo principal.
     while ((aluno_lido = le_aluno(arquivo_alunos)) != NULL) {
+        // insere na tabela hash apenas se o aluno estiver marcado como 'ocupado'.
         if (aluno_lido->ocupado) {
              inserir_aluno_hash(tabelaHash, listaEncadeada, aluno_lido);
         }
-        free(aluno_lido);
+        free(aluno_lido); // libera a memória usada para ler o aluno.
     }
 }
 
+// busca por um aluno usando a matrícula, aproveitando a velocidade da tabela hash.
 TAluno* buscar_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, int matricula) {
+    // calcula a posição provável do aluno na tabela.
     int hash_local = funcao_hash_aluno(matricula);
     fseek(tabelaHash, hash_local * sizeof(int), SEEK_SET);
 
+    // lê o ponteiro para a lista de alunos naquela posição.
     int ponteiro_compartimento;
     fread(&ponteiro_compartimento, sizeof(int), 1, tabelaHash);
 
+    // se o ponteiro é -1, o compartimento está vazio, então o aluno não existe.
     if (ponteiro_compartimento == -1) {
-        return NULL; // Compartimento vazio
+        return NULL; // compartimento vazio.
     }
 
+    // se chegou aqui, existe uma lista. vamos percorrê-la.
     int pos_atual = ponteiro_compartimento;
     while (pos_atual != -1) {
         TNoHashAluno no_atual;
         fseek(listaEncadeada, pos_atual * sizeof(TNoHashAluno), SEEK_SET);
         fread(&no_atual, sizeof(TNoHashAluno), 1, listaEncadeada);
 
+        // verifica se a matrícula do nó atual é a que procuramos e se ele está 'ocupado'.
         if (no_atual.aluno.matricula == matricula && no_atual.ocupado) {
+            // se encontrou, aloca memória para o aluno e retorna uma cópia dos seus dados.
             TAluno *aluno_achado = (TAluno*) malloc(sizeof(TAluno));
             *aluno_achado = no_atual.aluno;
             return aluno_achado;
         }
+        // se não for este, vai para o próximo da lista.
         pos_atual = no_atual.proximo;
     }
-    return NULL; // Não encontrou na lista
+    return NULL; // não encontrou na lista.
 }
 
+// remove um aluno logicamente, ou seja, apenas o marca como 'não ocupado'.
 bool remover_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_alunos, int matricula) {
+    // o processo de busca inicial é o mesmo da função de buscar.
     int hash_local = funcao_hash_aluno(matricula);
     fseek(tabelaHash, hash_local * sizeof(int), SEEK_SET);
 
@@ -117,7 +140,7 @@ bool remover_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_al
     fread(&ponteiro_compartimento, sizeof(int), 1, tabelaHash);
 
     if (ponteiro_compartimento == -1) {
-        return false;
+        return false; // o aluno não está aqui.
     }
 
     int pos_atual = ponteiro_compartimento;
@@ -127,15 +150,17 @@ bool remover_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_al
         fread(&no_atual, sizeof(TNoHashAluno), 1, listaEncadeada);
 
         if (no_atual.aluno.matricula == matricula && no_atual.ocupado) {
-            // Marca como não ocupado na lista encadeada
+            // encontrou o aluno. agora vamos marcá-lo como removido.
+            // 1. marca como 'não ocupado' no arquivo da lista encadeada.
             no_atual.ocupado = false;
             fseek(listaEncadeada, pos_atual * sizeof(TNoHashAluno), SEEK_SET);
             fwrite(&no_atual, sizeof(TNoHashAluno), 1, listaEncadeada);
 
-            // Marca como não ocupado no arquivo de dados principal (aluno.dat)
+            // 2. para manter a consistência, também marca como 'não ocupado' no arquivo principal de dados (aluno.dat).
             TAluno aluno_arquivo;
             rewind(arquivo_alunos);
             long pos_aluno_arquivo = 0;
+            // procura o aluno no arquivo principal.
             while(fread(&aluno_arquivo, sizeof(TAluno), 1, arquivo_alunos) == 1) {
                 if(aluno_arquivo.matricula == matricula) {
                     aluno_arquivo.ocupado = false;
@@ -146,35 +171,38 @@ bool remover_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_al
                 }
                 pos_aluno_arquivo++;
             }
-            return true;
+            return true; // sucesso na remoção.
         }
         pos_atual = no_atual.proximo;
     }
-    return false;
+    return false; // não encontrou o aluno para remover.
 }
 
-
+// função para visualizar a estrutura da tabela hash, útil para depuração e apresentação.
 void imprimir_tabela_hash(FILE *tabelaHash, FILE *listaEncadeada) {
     rewind(tabelaHash);
-    printf("\n--- ESTRUTURA DA TABELA HASH (ALUNOS) ---\n");
+    printf("\n--- estrutura da tabela hash (alunos) ---\n");
 
+    // percorre cada compartimento da tabela.
     for (int i = 0; i < TAMANHO_HASH_ALUNO; i++) {
         int ponteiro;
         fread(&ponteiro, sizeof(int), 1, tabelaHash);
 
-        printf("\nCompartimento [%03d]: ", i);
+        printf("\ncompartimento [%03d]: ", i);
         if (ponteiro == -1) {
-            printf("Vazio.");
+            printf("vazio.");
         } else {
-            printf("Ponteiro para indice %d da lista.", ponteiro);
+            // se não estiver vazio, mostra para qual índice da lista ele aponta.
+            printf("ponteiro para indice %d da lista.", ponteiro);
             int pos_atual = ponteiro;
+            // percorre e imprime toda a lista encadeada daquele compartimento.
             while (pos_atual != -1) {
                 TNoHashAluno no_atual;
                 fseek(listaEncadeada, pos_atual * sizeof(TNoHashAluno), SEEK_SET);
                 fread(&no_atual, sizeof(TNoHashAluno), 1, listaEncadeada);
 
                 if (no_atual.ocupado) {
-                    printf("\n    -> [Mat: %d, Nome: %s, Proximo_Indice: %d]",
+                    printf("\n    -> [mat: %d, nome: %s, proximo_indice: %d]",
                            no_atual.aluno.matricula, no_atual.aluno.nome, no_atual.proximo);
                 }
                 pos_atual = no_atual.proximo;

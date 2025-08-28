@@ -1,10 +1,8 @@
-// tabela_hash_aluno.h
-
 #ifndef TABELA_HASH_ALUNO_H
 #define TABELA_HASH_ALUNO_H
 
 #include <stdbool.h>
-#include "aluno.h" // Inclui a definição de TAluno
+#include "aluno.h"
 
 // Tamanho da tabela hash. Um número primo é geralmente uma boa escolha.
 #define TAMANHO_HASH_ALUNO 101
