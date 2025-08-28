@@ -12,18 +12,18 @@ int funcao_hash_aluno(int codigo) {
 
 // inicializa o arquivo da tabela hash com -1 em todas as posições
 void cria_tabela_hash_vazia(FILE *tabelaHash) {
-    int ponteiroVazio = -1; // -1 atua como um ponteiro nulo, indicando que aquele "compartimento" da tabela está vazio
+    int ponteiroVazio = -1; // -1 atua como um ponteiro nulo, indicando que o compartimento da tabela está vazio
     rewind(tabelaHash);
     // percorre a tabela inteira, escrevendo -1 em cada posição.
     for (int i = 0; i < TAMANHO_HASH_ALUNO; i++) {
         fwrite(&ponteiroVazio, sizeof(int), 1, tabelaHash);
     }
-    fflush(tabelaHash); //força a escrita dos dados no disco para garantir que a tabela seja salva corretamente
+    fflush(tabelaHash);
 }
 
-//insere um aluno na tabela hash baseada em arquivo
+//insere um aluno na tabela hash em disco
 void inserir_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, TAluno *aluno) {
-    // primeiro, calcula a posição (hash) onde o aluno deveria estar
+    // primeiro, calcula a posição onde o aluno deveria estar
     int hash_local = funcao_hash_aluno(aluno->matricula);
     fseek(tabelaHash, hash_local * sizeof(int), SEEK_SET);
 
@@ -130,7 +130,7 @@ TAluno* buscar_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, int matricula)
     return NULL; // não encontrou na lista.
 }
 
-// remove um aluno logicamente, ou seja, apenas o marca como 'não ocupado'.
+// remove um aluno logicamente, marcando como nao ocupado
 bool remover_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_alunos, int matricula) {
     // o processo de busca inicial é o mesmo da função de buscar.
     int hash_local = funcao_hash_aluno(matricula);
@@ -143,6 +143,7 @@ bool remover_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_al
         return false; // o aluno não está aqui.
     }
 
+    //inicia a navegacao pela lista encadeada
     int pos_atual = ponteiro_compartimento;
     while (pos_atual != -1) {
         TNoHashAluno no_atual;
@@ -151,12 +152,13 @@ bool remover_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_al
 
         if (no_atual.aluno.matricula == matricula && no_atual.ocupado) {
             // encontrou o aluno. agora vamos marcá-lo como removido.
-            // 1. marca como 'não ocupado' no arquivo da lista encadeada.
+
+            // marca como não ocupado no arquivo da lista encadeada.
             no_atual.ocupado = false;
             fseek(listaEncadeada, pos_atual * sizeof(TNoHashAluno), SEEK_SET);
             fwrite(&no_atual, sizeof(TNoHashAluno), 1, listaEncadeada);
 
-            // 2. para manter a consistência, também marca como 'não ocupado' no arquivo principal de dados (aluno.dat).
+            // marca não ocupado no arquivo de dados de alunos tambem
             TAluno aluno_arquivo;
             rewind(arquivo_alunos);
             long pos_aluno_arquivo = 0;
@@ -175,10 +177,10 @@ bool remover_aluno_hash(FILE *tabelaHash, FILE *listaEncadeada, FILE *arquivo_al
         }
         pos_atual = no_atual.proximo;
     }
-    return false; // não encontrou o aluno para remover.
+    return false; // não encontrou o aluno pra remover
 }
 
-// função para visualizar a estrutura da tabela hash, útil para depuração e apresentação.
+// função para visualizar a estrutura da tabela hash pra apresentacao
 void imprimir_tabela_hash(FILE *tabelaHash, FILE *listaEncadeada) {
     rewind(tabelaHash);
     printf("\n--- estrutura da tabela hash (alunos) ---\n");
